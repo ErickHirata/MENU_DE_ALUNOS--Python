@@ -1,2 +1,212 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+
+# Variáveis Globais:
+ALUNOS = []
+contador_alunos = 0
+
+
+# Menu de Navegação:
+def menu():
+    
+    print("\nCONTROLE DE TURMA\n")
+    print("")
+    print("1 - Cadastro de Aluno")
+    print("2 - Edicao de Aluno")
+    print("3 - Exclusao de Aluno")
+    print("4 - Resumo Estatistico")
+    print("5 - Exportar Informacoes")
+    print("6 - Importar Informacoes")
+    print("")
+    print("0 - Sair\n")
+
+# Função - LER OPÇÃO
+
+def leia_opcao():
+    opcao = int(input("Opção: "))
+    while opcao < 0 or opcao > 6:
+        print("Opção invalida! Tente os numeros de 1 a 6 das opções!")
+        menu()
+        opcao = int(input("Opção: "))
+    return opcao
+
+# 1 - CADASTRO DO ALUNO
+def cadastro_aluno():
+    
+    while True: #Loop para garantir que o código será rodado pelo menos uma vez.
+        try:
+            ra = int(input("\nDigite o RA:  "))
+            break # Encerra o código quando o valor ser inserido corretamente!
+        except ValueError:
+            print("Digite o número do RA do aluno, sem utilizar casas decimais!")
+            
+    nome = input("Digite o NOME:  ")
+    
+    while True: 
+        try:
+            nota = float(input("Digite a NOTA:  "))
+            break  
+        except ValueError:
+            print("Digite o número de RA do aluno, sem utilizar casas decimais.")
+        
+    aluno = {
+        "R.A.": ra,
+        "Nome": nome,
+        "Nota": nota,
+    }
+    
+    ALUNOS.append(aluno) #Insere um dicionário aluno dentro da lista ALUNOS!
+
+    global contador_alunos
+    contador_alunos += 1
+
+    print(f"Aluno {nome} cadastrado com sucesso!")
+
+# 2 - Editar aluno
+def editar_aluno():
+    
+    while True: #Loop para garantir que o código será executado pelo menos uma vez!
+        try:
+            ra = int(input("Digite o R.A. do aluno que deseja editar: "))
+            break
+        except ValueError:
+            print("Digite o número de RA do aluno, sem utilizar casas decimais.")
+
+    aluno_encontrado = None
+    for aluno in ALUNOS:
+        if aluno["R.A."] == ra:
+            aluno_encontrado = aluno
+            break
+    
+    if aluno_encontrado is not None:
+        novo_nome = input("Digite o novo NOME: ")
+        nova_nota = float(input("Digite a nova NOTA: "))
+        aluno_encontrado["Nome"] = novo_nome
+        aluno_encontrado["Nota"] = nova_nota
+        
+        print(f"As informações do aluno com R.A. {ra} foram atualizadas com sucesso.")
+    else:
+        print(f"Aluno com R.A. {ra} não encontrado.")
+
+# 3 - Remover aluno
+def remover_aluno():
+    
+    while True: #Loop para garantir que o código será executado pelo menos uma vez!
+        try:
+            ra = int(input("Digite o R.A. a ser removido do sistema:   "))
+            break
+        except ValueError:
+            print("Digite o número de RA do aluno, sem utilizar casas decimais.")
+            
+    indice = -1  
+    
+    for i in range(len(ALUNOS)):  
+        if ALUNOS[i]["R.A."] == ra:  
+            indice = i
+    
+    if indice == -1:  
+        print("R.A. NÃO corresponde a nenhum aluno cadastrado.")
+    else:
+        del ALUNOS[indice] 
+        global contador_alunos
+        contador_alunos -= 1
+        print("Aluno REMOVIDO com sucesso!")
+
+# 4 - Resumo Estatistico
+def resumo_estatistico():
+    if contador_alunos == 0:
+        print("Não há alunos cadastrados para gerar um resumo estatístico.")
+    else: 
+        aluno_maior_nota = max(ALUNOS, key=lambda x: x["Nota"])
+        aluno_menor_nota = min(ALUNOS, key=lambda x: x["Nota"])
+
+        notas = [aluno["Nota"] for aluno in ALUNOS]
+        media = sum(notas) / len(notas)
+
+        print(f"Quantidade de alunos: {contador_alunos}")
+        print(f"MAIOR NOTA: {aluno_maior_nota['Nome']} - Nota: {aluno_maior_nota['Nota']}")
+        print(f"MENOR NOTA: {aluno_menor_nota['Nome']} - Nota: {aluno_menor_nota['Nota']}")
+        print(f"MEDIA da turma: {media:.2f}")
+
+# 5 - Exportar Informacoes
+def exportar_informacoes():
+    if contador_alunos == 0:
+        print("NÃO HÁ alunos cadastrados para exportar informações.")
+    else:
+        nome_arquivo = input("Digite o nome do arquivo: ")
+        arquivo = open(nome_arquivo, "w")
+        for aluno in ALUNOS:
+            arquivo.write(str(aluno["R.A."]))
+            arquivo.write("|")
+            arquivo.write(aluno["Nome"])
+            arquivo.write("|")
+            arquivo.write(str(aluno["Nota"]))
+            arquivo.write("\n")
+        arquivo.close()
+        print("Informações dos alunos exportadas com sucesso para '{}'")
+
+# 6 - Importar Informacoes
+def importar_informacoes():
+    alunos_importados = []
+    ler_arquivo = input("Digite o nome do arquivo para importar: ")
+    try:
+        arquivo = open(ler_arquivo, "r")  # R read pra ler
+        ler = arquivo.readlines()
+        for item in ler:
+            dados = item.strip().split("|")
+            if len(dados) == 3:
+                aluno = {
+                    "R.A.": int(dados[0].strip()),
+                    "Nome": dados[1].strip(),
+                    "Nota": float(dados[2].strip())  # agora float, tirei int de antes
+                }
+                alunos_importados.append(aluno)
+                print(f"Informações importadas: {item.strip()}")
+            else:
+                print(f"Formato incorreto na linha: {item.strip()}")
+
+        global contador_alunos
+        contador_alunos += len(alunos_importados)
+
+        arquivo.close()
+        print("Informações dos alunos importadas com sucesso!")
+
+        ALUNOS.extend(alunos_importados)
+
+    except FileNotFoundError: #erro parou, msg para não acha arquivo escrito
+        print(f"O arquivo '{ler_arquivo}' não foi encontrado.")
+
+    return alunos_importados
+
+
+
+while True:
+    menu()
+    opcao = leia_opcao()
+
+#0 - SAIR
+    if opcao == 0:
+        break
+
+#1 - Cadastro aluno
+    elif opcao == 1:
+        cadastro_aluno()
+
+#2 - Editar registros
+    elif opcao == 2:
+        editar_aluno()
+
+#3 - Remover Aluno
+    elif opcao == 3:
+        remover_aluno()
+
+#4 - Resumo Estatistico
+    elif opcao == 4:
+        resumo_estatistico()
+
+#5 - Exportar Informacoes
+    elif opcao == 5:
+        exportar_informacoes()
+
+#6 - Importat Informacoes
+    elif opcao == 6:
+        importar_informacoes()
+        
